@@ -1,0 +1,221 @@
+#include <stdio.h>
+#include <stdlib.h>
+void input(int n,int m,int arr[n][m]);
+void output(int m,int n,int arr[m][n]);
+void swap(int*,int*);
+void sortbyburst(int a,int b,int arr[a][b]);
+void sortbyarrival(int a,int b,int arr[a][b]);
+void sortbypriority(int a,int b,int arr[a][b]);
+void sjf(int rows, int cols, int thisarray[rows][cols]);
+void fcfs(int rows, int cols, int thisarray[rows][cols]);
+void prioritysc(int rows, int cols, int thisarray[rows][cols]);
+void printresult(int row,int col,int tble[row][col]);
+void rr(int rows, int cols, int thisarray[rows][cols]);
+void TwoDarrcpy(int l,int b,int this1[l][b],int this2 [l][b]);
+int main()
+{
+int num;
+system("clear");
+printf("\n--------------------------------------------------------------------\n");
+printf("\nEnter number of processes : ");
+scanf("%d",&num);
+int table[num][4];
+input(num,4,table);
+printf("\n--------------------------------------------------------------------\n");
+printf("\nEntered input : \n");
+output(num,4,table);
+int RRarray[num][4];
+TwoDarrcpy(num,4,table,RRarray);
+printf("\n--------------------------------------------------------------------\n");
+fcfs(num,4,table);
+printf("\n--------------------------------------------------------------------\n");
+prioritysc(num,4,table);
+printf("\n--------------------------------------------------------------------\n");
+sjf(num,4,table);
+printf("\n--------------------------------------------------------------------\n");
+rr(num,4,RRarray);
+printf("\n--------------------------------------------------------------------\n");
+return 0;
+}
+void input(int n,int m,int arr[n][m]) //takes input to table
+{
+int i;
+printf("\nEnter details of %d processes : \n(!!!! 1 is the highest priority !!!!)",n);
+for (i=0;i<n;i++)
+{
+printf("\n\tEnter details of process %d : ",i);
+int inp;
+arr[i][0]=i;
+printf("\n\t\tEnter arrival time of process %d : ",i);
+scanf("%d",&inp);
+arr[i][1]=inp;
+printf("\n\t\tEnter burst time of process %d : ",i);
+scanf("%d",&inp);
+arr[i][2]=inp;
+printf("\n\t\tEnter priority of process %d : " ,i);
+scanf("%d",&inp);
+arr[i][3]=inp;
+}
+}
+void output(int m,int n,int arr[m][n]) //Prints input table
+{
+int i;
+printf("\tProcess\tArrival time\tBurst time\tPriority");
+for(i=0;i<m;i++)
+{
+printf("\n");
+printf("\tP%d \t%d \t\t%d \t\t%d",arr[i][0],arr[i][1],arr[i][2],arr[i][3]);
+}
+printf("\n");
+}
+void swap(int *val1, int *val2) //Swap func for sort
+{
+int temp = *val1;
+*val1 = *val2;
+*val2 = temp;
+}
+void sortbyarrival(int a,int b,int arr[a][b]) //sorts table by arrival time
+{
+int i,j;
+for(i=0;i<a-1;i++)
+{
+for(j=0;j<a-i-1;j++)
+{
+if (arr[j][1] > arr[j+1][1])
+{
+swap(&arr[j][1], &arr[j+1][1]);
+swap(&arr[j][0], &arr[j+1][0]);
+swap(&arr[j][2], &arr[j+1][2]);
+swap(&arr[j][3], &arr[j+1][3]);
+}
+}
+}
+printf("\nEntered input sorted by arrival time : \n");
+output(a,b,arr);
+}
+void sortbyburst(int a,int b,int arr[a][b]) //sorts table by burst time
+{
+printf("\nEntered input sorted by burst time : \n");
+int i,j;
+for(i=0;i<a-1;i++)
+{
+for(j=0;j<a-i-1;j++)
+{
+if (arr[j][2] > arr[j+1][2])
+{
+swap(&arr[j][1], &arr[j+1][1]);
+swap(&arr[j][0], &arr[j+1][0]);
+swap(&arr[j][2], &arr[j+1][2]);
+swap(&arr[j][3], &arr[j+1][3]);
+}
+}
+}
+output(a,b,arr);
+}
+void sortbypriority(int a,int b,int arr[a][b]) //Sorts table by priority 1 being the highest
+{
+printf("\nEntered input sorted by priority : \n");
+int i,j;
+for(i=0;i<a-1;i++)
+{
+for(j=0;j<a-i-1;j++)
+{
+if (arr[j][3] > arr[j+1][3])
+{
+swap(&arr[j][1], &arr[j+1][1]);
+swap(&arr[j][0], &arr[j+1][0]);
+swap(&arr[j][2], &arr[j+1][2]);
+swap(&arr[j][3], &arr[j+1][3]);
+}
+}
+}
+output(a,b,arr);
+}
+void printresult(int row,int col,int tble[row][col])
+{
+int bt[row],wt[row],tat[row],i;
+float wtavg,tatavg;
+wt[0] = wtavg = 0;
+tat[0] = tatavg = tble[0][2];
+for(i=1;i<row;i++)
+{
+wt[i] = wt[i-1] +tble[i-1][2];
+tat[i] = tat[i-1] +tble[i][2];
+wtavg = wtavg + wt[i];
+tatavg = tatavg + tat[i];
+}
+printf("\n\n");
+printf("PROCESS \tBURST TIME \t WAITING TIME\t TURNAROUND TIME\n");
+for(i=0;i<row;i++)
+printf("\nP%d \t\t %d \t\t %d \t\t %d", i, tble[i][2], wt[i], tat[i]);
+printf("\nAverage Waiting Time : %f", wtavg/row);
+printf("\nAverage Turnaround Time : %f \n", tatavg/row);
+}
+void fcfs(int rows, int cols, int thisarray[rows][cols])
+{
+printf("\nFIRST COME FIRST SERVE.\n");
+sortbyarrival(rows,cols,thisarray);
+printresult(rows,cols,thisarray);
+}
+void sjf(int rows, int cols, int thisarray[rows][cols])
+{
+printf("\nSHORTEST JOB FIRST.\n");
+sortbyburst(rows,cols,thisarray);
+printresult(rows,cols,thisarray);
+}
+void prioritysc(int rows, int cols, int thisarray[rows][cols])
+{
+printf("\nPRIORITY QUEUE.\n");
+sortbypriority(rows,cols,thisarray);
+printresult(rows,cols,thisarray);
+}
+void rr(int rows, int cols, int thisarray[rows][cols])
+{
+printf("\nSHORTEST JOB FIRST.\n");
+int i,j,n,bu[10],wa[10],tat[10],t,ct[10],max;
+float awt=0,att=0,temp=0;
+n=rows;
+for(i=0;i<n;i++)
+{
+bu[i]=thisarray[i][3];
+ct[i]=bu[i];
+}
+printf("\nEnter the size of time slice : ");
+scanf("%d",&t);
+max=bu[0];
+for(i=1;i<n;i++)
+if(max<bu[i])
+max=bu[i];
+for(j=0;j<(max/t)+1;j++)
+for(i=0;i<n;i++)
+if(bu[i]!=0)
+if(bu[i]<=t)
+{
+tat[i]=temp+bu[i];
+temp=temp+bu[i];
+bu[i]=0;
+}
+else
+{
+bu[i]=bu[i]-t;
+temp=temp+t;
+}
+for(i=0;i<n;i++)
+{
+wa[i]=tat[i]-ct[i]; att+=tat[i];
+awt+=wa[i];
+}
+printf("\nPROCESS\t BURST TIME \t WAITING TIME\tTURNAROUND TIME\n");
+for(i=0;i<n;i++)
+{
+printf("%d \t %d \t\t %d \t\t %d \n",i,ct[i],wa[i],tat[i]);
+}
+printf("\nThe Average Waiting time is : %f ",awt/n);
+printf("\nThe Average Turnaround time is : %f",att/n);
+}
+void TwoDarrcpy(int l,int b,int this1[l][b],int this2 [l][b])
+{
+for(int i=0;i<l;i++)
+for(int j=0;j<b;j++)
+this2[i][j]=this1[i][j];
+}

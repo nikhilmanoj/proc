@@ -1,0 +1,244 @@
+#include<stdio.h> #include<stdlib.h>
+
+void fifo(int n, int req[]) {
+  printf("FIFO");
+  printf("\n");
+  int frame[3], fn = 0, k = 0, i, j, flag = 0, pageFaultCount = 0;
+  for (i = 0; i < n; ++i) {
+    if (fn < 3) {
+      for (j = 0; j < fn; ++j) {
+        if (frame[j] == req[i]) flag++;
+      }
+      if (flag == 1) {
+        printf("page %d is in frame\n", req[i]);
+        flag--;
+      } else {
+        printf("page %d is allocated on frame %d\n", req[i], fn);
+        frame[fn] = req[i];
+        fn++;
+      }
+    } else {
+      for (j = 0; j < 3; ++j) {
+        if (frame[j] == req[i])
+          flag++;
+      }
+      if (flag == 1) {
+        printf("page %d is in frame\n", req[i]);
+        flag--;
+      } else {
+        printf("page fault occured\n");
+        pageFaultCount++;
+        printf("page %d replaced with page %d\n", frame[k], req[i]);
+        frame[k] = req[i];
+        k = (k + 1) % 3;
+      }
+    }
+  }
+  printf("Number of page faults is : %d\n", pageFaultCount);
+}
+void lru(int n, int req[]) {
+  struct lru {
+    int data;
+    struct lru * next;
+  };
+  struct lru * ptr;
+  struct lru * previous;
+  struct lru * header = (struct lru * ) malloc(sizeof(struct lru));
+  header -> data = -1;
+  header -> next = NULL;
+  printf("LRU");
+  printf("\n");
+  int frame[3], fn = 0, i, j, flag = 0, pageFaultCount = 0;
+  for (i = 0; i < n; ++i) {
+    if (fn < 3) {
+      for (j = 0; j < fn; ++j) {
+        if (frame[j] == req[i]) flag++;
+      }
+      if (flag == 1) {
+        printf("page %d is in frame\n", req[i]);
+        flag--;
+        ptr = header;
+        previous = header;
+        while (ptr -> data != req[i]) {
+          previous = ptr;
+          ptr = ptr -> next;
+        }
+        previous -> next = ptr -> next;
+        previous = ptr;
+
+        ptr = header;
+        while (ptr -> next != NULL) {
+          ptr = ptr -> next;
+        }
+        ptr -> next = previous;
+        previous -> next = NULL;
+      } else {
+        printf("page %d is allocated on frame %d\n", req[i], fn);
+        frame[fn] = req[i];
+        fn++;
+        ptr = header;
+        while (ptr -> next != NULL) {
+          ptr = ptr -> next;
+        }
+        struct lru * newlru = (struct lru * ) malloc(sizeof(struct lru));
+        ptr -> next = newlru;
+        newlru -> data = req[i];
+        newlru -> next = NULL;
+      }
+    } else {
+      for (j = 0; j < 3; ++j) {
+        if (frame[j] == req[i])
+          flag++;
+      }
+      if (flag == 1) {
+        printf("page %d is in frame\n", req[i]);
+        flag--;
+        ptr = header;
+        while (ptr -> data != req[i]) {
+          previous = ptr;
+          ptr = ptr -> next;
+        }
+        previous -> next = ptr -> next;
+        previous = ptr;
+        ptr = header;
+        while (ptr -> next != NULL) {
+
+          ptr = ptr -> next;
+        }
+        ptr -> next = previous;
+        previous -> next = NULL;
+      } else {
+        printf("page fault occured\n");
+        pageFaultCount++;
+        printf("page %d replaced with page %d\n", (header -> next) -> data, req[i]);
+        for (j = 0; j < 3; ++j) {
+          if (frame[j] == (header -> next) -> data) break;
+        }
+        frame[j] = req[i];
+        ptr = header -> next;
+        header -> next = ptr -> next;
+        free(ptr);
+        ptr = header;
+        while (ptr -> next != NULL) {
+          ptr = ptr -> next;
+        }
+        struct lru * newlru = (struct lru * ) malloc(sizeof(struct lru));
+        ptr -> next = newlru;
+        newlru -> data = req[i];
+        newlru -> next = NULL;
+      }
+    }
+  }
+  printf("Number of page faults is : %d\n", pageFaultCount);
+}
+void lfu(int n, int req[]) {
+  struct lfu {
+    int data;
+    int count;
+    struct lfu * next;
+  };
+  struct lfu * ptr;
+  struct lfu * previous;
+
+  struct lfu * header = (struct lfu * ) malloc(sizeof(struct lfu));
+  header -> data = -1;
+  header -> next = NULL;
+  printf("LFU");
+  printf("\n");
+  int frame[3], fn = 0, k, l, i, j, flag = 0, temp, pageFaultCount = 0;
+  for (i = 0; i < n; ++i) {
+    if (fn < 3) {
+      for (j = 0; j < fn; ++j) {
+        if (frame[j] == req[i]) flag++;
+      }
+      if (flag == 1) {
+        printf("page %d is in frame\n", req[i]);
+        flag--;
+        ptr = header;
+        while (ptr -> data != req[i]) {
+          ptr = ptr -> next;
+        }
+        ptr -> count++;
+      } else {
+        printf("page %d is allocated on frame %d\n", req[i], fn);
+        frame[fn] = req[i];
+        fn++;
+        ptr = header;
+        while (ptr -> next != NULL) {
+          ptr = ptr -> next;
+        }
+        struct lfu * newlfu = (struct lfu * ) malloc(sizeof(struct lfu));
+        newlfu -> data = req[i];
+        newlfu -> count++;
+        ptr -> next = newlfu;
+      }
+    } else {
+      for (j = 0; j < 3; ++j) {
+        if (frame[j] == req[i])
+
+          flag++;
+      }
+      if (flag == 1) {
+        printf("page %d is in frame\n", req[i]);
+        flag--;
+        ptr = header;
+        while (ptr -> data != req[i]) {
+          ptr = ptr -> next;
+        }
+        ptr -> count++;
+      } else {
+        printf("page fault occured\n");
+        pageFaultCount++;
+        l = 100;
+        ptr = header;
+        while (ptr -> next != NULL) {
+          ptr = ptr -> next;
+          for (int t = 0; t < 3; ++t) {
+            if ((ptr -> count < l) && (ptr -> data == frame[t])) {
+              previous = ptr;
+              l = ptr -> count;
+            }
+          }
+        }
+        printf("page %d replaced with page %d\n", previous -> data, req[i]);
+        for (j = 0; j < 3; ++j) {
+          if (frame[j] == previous -> data) break;
+        }
+        frame[j] = req[i];
+        ptr = header;
+        while (ptr -> data != req[i] && ptr -> next != NULL) {
+          ptr = ptr -> next;
+        }
+        if (ptr -> data == req[i]) ptr -> count++;
+        else {
+
+          ptr = header;
+          while (ptr -> next != NULL) {
+            ptr = ptr -> next;
+          }
+          struct lfu * newlfu = (struct lfu * ) malloc(sizeof(struct lfu));
+          newlfu -> data = req[i];
+          newlfu -> count++;
+          ptr -> next = newlfu;
+        }
+      }
+    }
+  }
+  printf("Number of page faults is : %d\n", pageFaultCount);
+}
+void main() {
+  int i, n;
+  printf("Number of frammes is : 3\n");
+  printf("enter the number of page requests\n");
+  scanf("%d", & n);
+  int req[n];
+  printf("enter the pages\n");
+  for (i = 0; i < n; ++i)
+    scanf("%d", & req[i]);
+  printf("\n");
+  fifo(n, req);
+  printf("\n");
+  lru(n, req);
+  printf("\n");
+  lfu(n, req);
+}

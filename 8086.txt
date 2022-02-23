@@ -1,0 +1,55 @@
+1. Adding two numbers
+//press A ,give start address eg:1000
+MOV AX,0
+ADD AX,05
+ADD AX,04
+MOV [2000],AX
+HLT
+// press Esc
+// press G , give start address , 1000
+// press reset
+// press M , give address 2000
+// output will be on screen
+
+2) Adding two numbers from memmory
+MOV AX, [2000]
+ADD AX, [2002]
+MOV [2022], AX
+HLT
+
+3) Array - moving elements of one array to another array
+1000 : MOV CX , 05
+1003 : MOV SI , 2000
+1006 : MOV DI , 3000
+1009 : MOV AX , [SI]
+100A : MOV [DI] , AX
+100D : INC SI
+     : INC SI
+100E : INC DI
+100F : DEC CX
+1010 : JNZ 1009
+1013 : HLT
+
+
+4) Sum of array in location 2000
+1000 : MOV CX , 05
+1003 : MOV SI , 2000
+1006 : MOV AX , 00
+1009 : ADD AX , [SI]
+100A : INC SI
+100B : DEC CX
+100C : JNZ 1009
+100F : HLT
+
+5) To find average of above array
+1000 : MOV CX , 05
+1003 : MOV SI , 2000
+1006 : MOV AX , 00
+1009 : ADD AX , [SI]
+100A : INC SI
+100B : DEC CX
+100C : JNZ 1009
+100F : DIV 05
+1010 : MOV [3000] ,AL
+1013 : HLT
+//result will be on AL and reminder on AH
